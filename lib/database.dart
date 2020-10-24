@@ -2,59 +2,30 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class Task {
-  int _id;
-  String _task;
-  String _description;
-  String _time; //DateTime.now()
-  String _ping;
+  int id;
+  String task;
+  String description;
+  String time; //DateTime.now()
+  String ping;
 
-  Task(this._task, this._ping, this._time, [this._description]);
-  Task.withId(this._id, this._task, this._ping, this._time,
-      [this._description]); //Named Constructor
-
-  //GETTERS
-  int get id => _id;
-  String get task => _task;
-  String get description => _description;
-  String get time => _time;
-  String get ping => _ping;
-
-  //SETTERS
-  set task(String newTask) {
-    //Add some validation layer here maybe?
-    this._task = newTask;
-  }
-
-  set description(String newDesc) {
-    this._description = newDesc;
-  }
-
-  set ping(String newPing) {
-    this._ping = newPing;
-  }
-
-  set time(String newTime) {
-    this._time = newTime;
-  }
+  Task({this.task, this.ping, this.time, this.description});
 
   Map<String, dynamic> toMap() {
     var map = Map<String, dynamic>();
-    if (id != null) {
-      map['id'] = _id;
-    }
-    map['task'] = _task;
-    map['ping'] = _ping;
-    map['description'] = _description;
-    map['time'] = _time;
+    if (id != null) map['id'] = id;
+    map['task'] = task;
+    map['ping'] = ping;
+    map['description'] = description;
+    map['time'] = time;
     return map;
   }
 
   Task.fromMap(Map<String, dynamic> map) {
-    this._id = map['id'];
-    this._description = map['description'];
-    this._task = map['task'];
-    this._ping = map['ping'];
-    this._time = map['time'];
+    id = map['id'];
+    description = map['description'];
+    task = map['task'];
+    ping = map['ping'];
+    time = map['time'];
   }
 }
 
@@ -85,19 +56,19 @@ class DatabaseHelper {
   }
 
   Future<Database> initializeDB() async {
-    print("PATH:${await getDatabasesPath()}");
     return await openDatabase(join(await getDatabasesPath(), 'tasks.db'),
         version: 1, onCreate: (Database db, int version) async {
       await db.execute(
-          "CREATE TABLE $taskTable($colId INTEGER AUTO_INCREMENT PRIMARY KEY,$colTask TEXT, $colPing TEXT, $colDescription TEXT,$colTime TEXT)");
+          "CREATE TABLE $taskTable($colId INTEGER PRIMARY KEY,$colTask TEXT, $colPing TEXT, $colDescription TEXT,$colTime TEXT)");
     });
   }
 
-  Future<List<Map<String, dynamic>>> getTasksMapList() async {
-    Database db = await this.database;
-    //var result = db.rawQuery("SELECT * FROM $taskTable");
-    var result = db.query(taskTable);
-    return result;
+  Future<List<Task>> fetchTasks() async {
+    Database db = await database;
+    List<Map> result = await db.query(taskTable);
+    return result.length == 0
+        ? []
+        : result.map((e) => Task.fromMap(e)).toList();
   }
 
   Future<int> insertTask(Task task) async {
@@ -115,7 +86,7 @@ class DatabaseHelper {
 
   Future<int> deleteTask(int id) async {
     Database db = await this.database;
-    int result = await db.rawDelete("DELTE FROM $taskTable WHERE $colId=$id");
+    int result = await db.rawDelete("DELETE FROM $taskTable WHERE $colId=$id");
     return result;
   }
 

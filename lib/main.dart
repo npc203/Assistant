@@ -1,6 +1,6 @@
 import 'package:Assistant/pages/AddTask.dart';
+import 'package:Assistant/pages/HomePage.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
 import 'navbar.dart';
 import 'database.dart';
 
@@ -17,32 +17,44 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => HomePage(),
+        '/task': (context) => TaskPage(),
         '/Add': (context) => AddTask(),
       },
     );
   }
 }
 
-class HomePage extends StatefulWidget {
+class TaskPage extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _TaskPageState createState() => _TaskPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _TaskPageState extends State<TaskPage> {
   List<Task> taskList;
   int count = 0;
-  DatabaseHelper databaseHelper = DatabaseHelper();
+  DatabaseHelper databaseHelper;
+  var check = false;
+
+  @override
+  void initState() {
+    super.initState();
+    databaseHelper = DatabaseHelper();
+    taskList = List<Task>();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (taskList == null) {
-      taskList = List<Task>();
-      updateListView();
+    print("Build!");
+    check = ModalRoute.of(context).settings.arguments;
+    if (taskList.isEmpty || check == true) {
+      print("refreginh!!$check");
+      refreshList();
+      check = false;
     }
     return Scaffold(
         //backgroundColor: Colors.grey[400],
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
+          onPressed: () async {
             Navigator.of(context).pushNamed('/Add');
           },
           child: Icon(Icons.add),
@@ -54,26 +66,29 @@ class _HomePageState extends State<HomePage> {
         body: ListView(
           children: taskList
               .map(
-                (item) => Dismissible(
-
-                    //background: Container(
-                    //  color: Colors.red,
-                    //  padding: EdgeInsets.fromLTRB(3, 7, 3, 0),
-                    //),
-                    child: CustomCard(
-                      data: item,
-                      color: getPingColor(item.ping),
-                    ),
-                    key: UniqueKey(),
-                    onDismissed: (direction) {
-                      _delete(context, item);
-                      // setState(() {
-                      //   taskList.remove(item);
-                      // });
-                      // Scaffold.of(context).showSnackBar(SnackBar(
-                      //     duration: const Duration(seconds: 1),
-                      //     content:
-                      //         Text("Dismissed Task with a ${item.ping} ping")));
+                (item) => StreamBuilder<Object>(
+                    stream: null,
+                    builder: (context, snapshot) {
+                      return Dismissible(
+                          //background: Container(
+                          //  color: Colors.red,
+                          //  padding: EdgeInsets.fromLTRB(3, 7, 3, 0),
+                          //),
+                          child: CustomCard(
+                            data: item,
+                            color: getPingColor(item.ping),
+                          ),
+                          key: UniqueKey(),
+                          onDismissed: (direction) {
+                            _delete(context, item);
+                            // setState(() {
+                            //   taskList.remove(item);
+                            // });
+                            // Scaffold.of(context).showSnackBar(SnackBar(
+                            //     duration: const Duration(seconds: 1),
+                            //     content:
+                            //         Text("Dismissed Task with a ${item.ping} ping")));
+                          });
                     }),
               )
               .toList(),
@@ -88,6 +103,10 @@ class _HomePageState extends State<HomePage> {
 
   void _delete(BuildContext context, Task task) async {
     int result = await databaseHelper.deleteTask(task.id);
+    setState(() {
+      taskList.remove(task);
+    });
+
     if (result != 0) {
       Scaffold.of(context).showSnackBar(
           SnackBar(content: Text("Task of ${task.ping} ping completed")));
@@ -112,18 +131,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  getTasksList() async {
-    var taskMapList = await databaseHelper.getTasksMapList();
-    List<Task> tasks = taskMapList.map((e) => Task.fromMap(e)).toList();
-    return tasks;
-  }
-
-  void updateListView() async {
-    getTasksList().then((newtaskList) {
-      print("DATA ${newtaskList[0].id}");
-      setState(() {
-        taskList = newtaskList;
-      });
+  void refreshList() async {
+    var newList = await databaseHelper.fetchTasks();
+    setState(() {
+      taskList = newList;
     });
   }
 }
@@ -146,7 +157,7 @@ class CustomCard extends StatelessWidget {
           //trailing: Icon(Icons.delete, size: 30),
           title: Padding(
             padding: const EdgeInsets.fromLTRB(3, 7, 3, 0),
-            child: Text("OWO${data.task}",
+            child: Text(data.task,
                 style: TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold)),
           ),

@@ -8,7 +8,7 @@ class AddTask extends StatefulWidget {
 
 class _AddTaskState extends State<AddTask> {
   final _formKey = GlobalKey<FormState>();
-  String _ping, _task, _desc;
+  Task newTask = Task();
   @override
   Widget build(BuildContext context) {
     List<String> ping = ["high", "medium", "low"];
@@ -25,6 +25,8 @@ class _AddTaskState extends State<AddTask> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 TextFormField(
+                  onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+                  textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
                     hintText: 'Give the Name of your Task',
                     labelText: 'Title *',
@@ -36,21 +38,26 @@ class _AddTaskState extends State<AddTask> {
                     return null;
                   },
                   onSaved: (String value) => setState(() {
-                    _task = value;
+                    newTask.task = value;
                   }),
                 ),
                 TextFormField(
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => FocusScope.of(context).unfocus(),
                   decoration: const InputDecoration(
                     hintText: 'Description of your task',
                     labelText: 'Description',
                   ),
-                  onSaved: (String value) => setState(() {
-                    _desc = value;
-                  }),
+                  onSaved: (String value) => {
+                    setState(() {
+                      newTask.description = value;
+                    }),
+                  },
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 10, 70, 10),
                   child: DropdownButtonFormField(
+                    //onTap: () => FocusScope.of(context).unfocus(),
                     decoration: InputDecoration(hintText: "Ping"),
                     items: ping.map((String category) {
                       return new DropdownMenuItem(
@@ -63,34 +70,28 @@ class _AddTaskState extends State<AddTask> {
                           ));
                     }).toList(),
                     onChanged: (value) {
-                      setState(() => _ping = value);
+                      setState(() => newTask.ping = value);
                     },
-                    value: _ping,
                   ),
                 ),
-                StreamBuilder<Object>(
-                    stream: null,
-                    builder: (context, snapshot) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: RaisedButton(
-                          onPressed: () async {
-                            // Validate returns true if the form is valid, or false
-                            // otherwise.
-                            if (_formKey.currentState.validate()) {
-                              // If the form is valid, display a Snackbar.
-                              Scaffold.of(context).showSnackBar(
-                                  SnackBar(content: Text('Adding field Data')));
-
-                              DatabaseHelper().insertTask(Task(_task, _ping,
-                                  DateTime.now().toString(), _desc));
-                              Navigator.of(context).pop();
-                            }
-                          },
-                          child: Text('Submit'),
-                        ),
-                      );
-                    }),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: RaisedButton(
+                    onPressed: () async {
+                      // Validate returns true if the form is valid, or false
+                      // otherwise.
+                      if (_formKey.currentState.validate()) {
+                        var form = _formKey.currentState;
+                        form.save();
+                        newTask.time = DateTime.now().toString();
+                        DatabaseHelper().insertTask(newTask);
+                        Navigator.pushReplacementNamed(context, '/task',
+                            arguments: true);
+                      }
+                    },
+                    child: Text('Submit'),
+                  ),
+                ),
               ],
             ),
           ),
