@@ -15,8 +15,26 @@ class NavBar extends StatelessWidget {
                 backgroundImage: AssetImage('assets/empty_avatar.png')),
           ),
           ListTile(
+            title: Text("Home"),
+            leading: Icon(Icons.home),
+            onTap: () {
+              if (ModalRoute.of(context).settings.name != '/') {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/', arguments: true);
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          ListTile(
             title: Text("Random Task"),
             leading: Icon(Icons.account_balance_wallet),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed('/task');
+            },
           ),
           ListTile(
             title: Text("Add Task"),

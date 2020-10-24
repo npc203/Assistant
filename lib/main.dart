@@ -45,11 +45,13 @@ class _TaskPageState extends State<TaskPage> {
   @override
   Widget build(BuildContext context) {
     print("Build!");
-    check = ModalRoute.of(context).settings.arguments;
-    if (taskList.isEmpty || check == true) {
+    //ModalRoute.of(context).settings.arguments == true
+    if (check == true) {
       print("refreginh!!$check");
       refreshList();
-      check = false;
+      setState(() {
+        check = false;
+      });
     }
     return Scaffold(
         //backgroundColor: Colors.grey[400],
