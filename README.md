@@ -1,19 +1,17 @@
 # Assistant
 
-A new Flutter project.
+Me Trying to learn flutter, Don't bully me.
+Saving progress in github so that I don't lose them if my pc messed up.
 
-## Getting Started
+## What does it have till now:
+- A CRUD app
+- NavBar
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+##Note:
+- too bad performance
+- unwanted pages stacking up
+- Database struct is a mess
+- No loading screen
 
 ## TODO
 - Change routing on the whole (named routes suck)
