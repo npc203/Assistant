@@ -1,8 +1,8 @@
 # Assistant
 
-Me Trying to learn flutter, Don't bully me.
-Saving progress in github so that I don't lose them if my pc messed up.
-Making it public so that I dont need to login to download this (ft.Nobody cares)
+Me Trying to learn flutter, Don't bully me.  
+Saving progress in github so that I don't lose them if my pc messed up.  
+Making it public so that I dont need to login to download this (ft.Nobody cares)  
 
 ## What does it have till now:
 - A CRUD app
